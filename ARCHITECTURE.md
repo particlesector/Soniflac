@@ -772,32 +772,15 @@ ksp = { id = "com.google.devtools.ksp", version = "2.1.0-1.0.29" }
 ```
 GitHub Repository Setup:
 |---- [x] Create repo: github.com/particlesector/Soniflac
-|---- [ ] Add LICENSE (GPL-3.0)
-|---- [ ] Add .gitignore (Android template)
-|---- [ ] Add ARCHITECTURE.md (this document)
-|---- [ ] Add CONTRIBUTING.md
-|---- [ ] Add README.md with badges
+|---- [x] Add LICENSE (GPL-3.0)
+|---- [x] Add .gitignore (Android template)
+|---- [x] Add ARCHITECTURE.md (this document)
+|---- [x] Add CONTRIBUTING.md
+|---- [x] Add README.md
 |---- [ ] Configure branch protection on main
-|---- [ ] Add GitHub Actions workflows
-|---- [ ] Add issue templates (bug report, feature request)
-|---- [ ] Add PR template
-|
-|---- Google Play Setup:
-|   |---- [ ] Register Google Play Developer account ($25)
-|   |---- [ ] Create app listing (can be draft)
-|   |---- [ ] Create service account for API access
-|   |---- [ ] Grant service account release manager permissions
-|   |---- [ ] Generate and store JSON key as GitHub Secret
-|
-|---- Signing Setup:
-|   |---- [ ] Generate release keystore
-|   |---- [ ] Base64 encode and store as GitHub Secret
-|   |---- [ ] BACK UP KEYSTORE (lose it = lose app identity forever)
-|
-|---- Website:
-|   |---- [x] Register soniflac.com
-|   |---- [ ] Deploy soniflac-site repo to Cloudflare Pages
-|   |---- [ ] Privacy policy live at soniflac.com/privacy
+|---- [x] Add GitHub Actions workflows
+|---- [x] Add issue templates (bug report, feature request)
+|---- [x] Add PR template
 |
 |---- Development Environment:
     |---- [ ] Android Studio Ladybug or newer
