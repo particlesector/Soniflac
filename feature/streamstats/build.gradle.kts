@@ -10,9 +10,9 @@ dependencies {
     implementation(project(":core:player"))
     implementation(project(":core:database"))
 
-    implementation(platform(libs.compose.bom))
-    implementation(libs.compose.ui)
-    implementation(libs.compose.material3)
-
     testImplementation(project(":core:testing"))
+    testImplementation(libs.junit5)
+    testImplementation(libs.mockk)
+    testImplementation(libs.turbine)
+    testImplementation(libs.coroutines.test)
 }

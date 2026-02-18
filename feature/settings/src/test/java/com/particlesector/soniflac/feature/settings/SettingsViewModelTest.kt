@@ -1,60 +1,105 @@
 package com.particlesector.soniflac.feature.settings
 
-import com.particlesector.soniflac.billing.BillingManager
+import app.cash.turbine.test
+import com.particlesector.soniflac.core.database.repository.DataUsageRepository
+import com.particlesector.soniflac.core.testing.MainDispatcherRule
+import com.particlesector.soniflac.core.testing.fakes.FakeBillingManager
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.resetMain
-import kotlinx.coroutines.test.setMain
-import org.junit.jupiter.api.AfterEach
+import kotlinx.coroutines.test.runTest
+import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
-import org.junit.jupiter.api.Assertions.assertNull
 import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.extension.ExtendWith
 
-@OptIn(ExperimentalCoroutinesApi::class)
+@ExtendWith(MainDispatcherRule::class)
 class SettingsViewModelTest {
 
-    private val testDispatcher = UnconfinedTestDispatcher()
-    private val premiumFlow = MutableStateFlow(false)
-    private val billingManager = mockk<BillingManager> {
-        every { isPremium } returns premiumFlow
-    }
+    private val billingManager = FakeBillingManager()
+    private val dataUsageRepository = mockk<DataUsageRepository>()
+    private val monthlyFlow = MutableStateFlow(0L)
+
+    private lateinit var viewModel: SettingsViewModel
 
     @BeforeEach
-    fun setup() {
-        Dispatchers.setMain(testDispatcher)
-    }
-
-    @AfterEach
-    fun tearDown() {
-        Dispatchers.resetMain()
+    fun setUp() {
+        every { dataUsageRepository.observeMonthly() } returns monthlyFlow
+        viewModel = SettingsViewModel(billingManager, dataUsageRepository)
     }
 
     @Test
-    fun `initial state reflects billing manager premium status`() {
-        val viewModel = SettingsViewModel(billingManager)
-        assertFalse(viewModel.uiState.value.isPremium)
+    fun `initial state is not premium`() = runTest {
+        val state = viewModel.uiState.value
+        assertFalse(state.isPremium)
+        assertEquals(0L, state.monthlyDataLimitMb)
     }
 
     @Test
-    fun `state updates when premium status changes`() {
-        val viewModel = SettingsViewModel(billingManager)
+    fun `premium status updates from billing manager`() = runTest {
+        billingManager.setPremium(true)
 
-        premiumFlow.value = true
-        assertTrue(viewModel.uiState.value.isPremium)
-
-        premiumFlow.value = false
-        assertFalse(viewModel.uiState.value.isPremium)
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertTrue(state.isPremium)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 
     @Test
-    fun `monthly data limit is null by default`() {
-        val viewModel = SettingsViewModel(billingManager)
-        assertNull(viewModel.uiState.value.monthlyDataLimitBytes)
+    fun `premium status reverts when billing changes`() = runTest {
+        billingManager.setPremium(true)
+        billingManager.setPremium(false)
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertFalse(state.isPremium)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `setMonthlyDataLimit updates state`() = runTest {
+        viewModel.setMonthlyDataLimit(500)
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals(500L, state.monthlyDataLimitMb)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `monthly data usage updates from repository`() = runTest {
+        monthlyFlow.value = 1_073_741_824L
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertEquals(1_073_741_824L, state.monthlyDataUsedBytes)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test
+    fun `queryPremiumStatus called on init`() = runTest {
+        assertEquals(1, billingManager.queryCount)
+    }
+
+    @Test
+    fun `combined state reflects all sources`() = runTest {
+        billingManager.setPremium(true)
+        viewModel.setMonthlyDataLimit(1000)
+        monthlyFlow.value = 500_000_000L
+
+        viewModel.uiState.test {
+            val state = awaitItem()
+            assertTrue(state.isPremium)
+            assertEquals(1000L, state.monthlyDataLimitMb)
+            assertEquals(500_000_000L, state.monthlyDataUsedBytes)
+            cancelAndIgnoreRemainingEvents()
+        }
     }
 }

@@ -20,6 +20,8 @@ ksp = "2.1.0-1.0.29"
 activity-compose = "1.9.3"
 core-ktx = "1.15.0"
 lifecycle = "2.8.7"
+robolectric = "4.14.1"
+detekt = "1.23.7"
 
 [libraries]
 # Compose
@@ -72,6 +74,7 @@ junit5 = { group = "org.junit.jupiter", name = "junit-jupiter", version.ref = "j
 mockk = { group = "io.mockk", name = "mockk", version.ref = "mockk" }
 turbine = { group = "app.cash.turbine", name = "turbine", version.ref = "turbine" }
 coroutines-test = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-test", version.ref = "coroutines" }
+robolectric = { group = "org.robolectric", name = "robolectric", version.ref = "robolectric" }
 
 # Billing (gplay only)
 billing = { group = "com.android.billingclient", name = "billing-ktx", version.ref = "billing" }
@@ -88,3 +91,4 @@ kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "ko
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }

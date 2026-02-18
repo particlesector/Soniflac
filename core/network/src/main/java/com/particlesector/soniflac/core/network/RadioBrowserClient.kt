@@ -1,6 +1,9 @@
 package com.particlesector.soniflac.core.network
 
 import com.particlesector.soniflac.core.common.Constants
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import java.net.InetAddress
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,13 +19,18 @@ class RadioBrowserClient @Inject constructor() {
         return resolveServerUrl().also { cachedBaseUrl = it }
     }
 
+    fun getBaseUrlBlocking(): String {
+        cachedBaseUrl?.let { return it }
+        return runBlocking { getBaseUrl() }
+    }
+
     fun clearCache() {
         cachedBaseUrl = null
     }
 
     companion object {
-        internal fun resolveServerUrl(): String {
-            return try {
+        internal suspend fun resolveServerUrl(): String = withContext(Dispatchers.IO) {
+            try {
                 val addresses = InetAddress.getAllByName(Constants.RadioBrowser.DNS_LOOKUP_HOST)
                 if (addresses.isNotEmpty()) {
                     val host = addresses.random().canonicalHostName

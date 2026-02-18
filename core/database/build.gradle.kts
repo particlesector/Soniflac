@@ -15,6 +15,8 @@ ksp {
 
 dependencies {
     implementation(project(":core:model"))
+    implementation(project(":core:common"))
+    implementation(project(":core:network"))
 
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
@@ -24,4 +26,5 @@ dependencies {
     testImplementation(libs.junit5)
     testImplementation(libs.room.testing)
     testImplementation(libs.coroutines.test)
+    testImplementation(libs.robolectric)
 }

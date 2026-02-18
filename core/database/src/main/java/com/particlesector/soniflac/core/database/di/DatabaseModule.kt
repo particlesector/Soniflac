@@ -6,6 +6,7 @@ import com.particlesector.soniflac.core.database.SoniFlacDatabase
 import com.particlesector.soniflac.core.database.dao.DataUsageDao
 import com.particlesector.soniflac.core.database.dao.FavoriteStationDao
 import com.particlesector.soniflac.core.database.dao.PlaybackHistoryDao
+import com.particlesector.soniflac.core.database.dao.PlaylistDao
 import com.particlesector.soniflac.core.database.dao.RecentStationDao
 import dagger.Module
 import dagger.Provides
@@ -28,18 +29,22 @@ object DatabaseModule {
         ).build()
 
     @Provides
-    fun provideFavoriteStationDao(db: SoniFlacDatabase): FavoriteStationDao =
-        db.favoriteStationDao()
+    fun provideFavoriteStationDao(database: SoniFlacDatabase): FavoriteStationDao =
+        database.favoriteStationDao()
 
     @Provides
-    fun provideRecentStationDao(db: SoniFlacDatabase): RecentStationDao =
-        db.recentStationDao()
+    fun provideRecentStationDao(database: SoniFlacDatabase): RecentStationDao =
+        database.recentStationDao()
 
     @Provides
-    fun providePlaybackHistoryDao(db: SoniFlacDatabase): PlaybackHistoryDao =
-        db.playbackHistoryDao()
+    fun providePlaybackHistoryDao(database: SoniFlacDatabase): PlaybackHistoryDao =
+        database.playbackHistoryDao()
 
     @Provides
-    fun provideDataUsageDao(db: SoniFlacDatabase): DataUsageDao =
-        db.dataUsageDao()
+    fun provideDataUsageDao(database: SoniFlacDatabase): DataUsageDao =
+        database.dataUsageDao()
+
+    @Provides
+    fun providePlaylistDao(database: SoniFlacDatabase): PlaylistDao =
+        database.playlistDao()
 }

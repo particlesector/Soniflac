@@ -10,6 +10,7 @@ dependencies {
     implementation(project(":core:model"))
     implementation(project(":core:common"))
     implementation(project(":core:player"))
+    implementation(project(":core:network"))
     implementation(project(":billing"))
 
     api(libs.junit5)

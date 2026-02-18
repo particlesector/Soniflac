@@ -16,18 +16,15 @@ interface DataUsageDao {
     @Query("SELECT * FROM data_usage WHERE date = :date")
     fun observeByDate(date: String): Flow<DataUsageEntity?>
 
-    @Query("SELECT COALESCE(SUM(bytesStreamed), 0) FROM data_usage WHERE date = :date")
-    suspend fun getTodayUsage(date: String): Long
+    @Query("SELECT * FROM data_usage WHERE date BETWEEN :startDate AND :endDate ORDER BY date ASC")
+    fun observeInRange(startDate: String, endDate: String): Flow<List<DataUsageEntity>>
 
-    @Query("SELECT COALESCE(SUM(bytesStreamed), 0) FROM data_usage WHERE date >= :startDate AND date <= :endDate")
-    suspend fun getUsageForRange(startDate: String, endDate: String): Long
+    @Query("SELECT SUM(bytesStreamed) FROM data_usage WHERE date BETWEEN :startDate AND :endDate")
+    fun observeTotalBytesInRange(startDate: String, endDate: String): Flow<Long>
 
-    @Query("SELECT COALESCE(SUM(bytesStreamed), 0) FROM data_usage WHERE date >= :startDate AND date <= :endDate")
-    fun observeUsageForRange(startDate: String, endDate: String): Flow<Long>
+    @Query("SELECT SUM(bytesStreamed) FROM data_usage WHERE date BETWEEN :startDate AND :endDate")
+    suspend fun getTotalBytesInRange(startDate: String, endDate: String): Long?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun upsert(entity: DataUsageEntity)
-
-    @Query("DELETE FROM data_usage WHERE date < :beforeDate")
-    suspend fun deleteOlderThan(beforeDate: String)
+    suspend fun insert(entity: DataUsageEntity)
 }
