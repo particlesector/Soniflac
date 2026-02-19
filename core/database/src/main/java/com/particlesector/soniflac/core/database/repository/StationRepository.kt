@@ -3,8 +3,8 @@ package com.particlesector.soniflac.core.database.repository
 import com.particlesector.soniflac.core.common.Constants
 import com.particlesector.soniflac.core.database.dao.FavoriteStationDao
 import com.particlesector.soniflac.core.database.dao.RecentStationDao
-import com.particlesector.soniflac.core.database.mapper.toEntity
 import com.particlesector.soniflac.core.database.mapper.toFavoriteEntity
+import com.particlesector.soniflac.core.database.mapper.toRecentEntity
 import com.particlesector.soniflac.core.database.mapper.toStation
 import com.particlesector.soniflac.core.model.Station
 import com.particlesector.soniflac.core.network.RadioBrowserApi
@@ -26,7 +26,7 @@ class StationRepository @Inject constructor(
         }
 
     fun observeRecents(): Flow<List<Station>> =
-        recentStationDao.observeAll().map { entities ->
+        recentStationDao.observeRecent().map { entities ->
             entities.map { it.toStation() }
         }
 
@@ -37,7 +37,7 @@ class StationRepository @Inject constructor(
 
     suspend fun toggleFavorite(station: Station): Boolean {
         return if (favoriteStationDao.isFavorite(station.stationUuid)) {
-            favoriteStationDao.delete(station.stationUuid)
+            favoriteStationDao.deleteByUuid(station.stationUuid)
             false
         } else {
             favoriteStationDao.insert(station.toFavoriteEntity())
@@ -51,7 +51,7 @@ class StationRepository @Inject constructor(
     }
 
     suspend fun addRecent(station: Station) {
-        recentStationDao.insert(station.toEntity())
+        recentStationDao.upsert(station.toRecentEntity())
     }
 
     suspend fun searchStations(query: String): List<Station> =

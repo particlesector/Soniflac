@@ -30,7 +30,7 @@ class StationRepositoryTest {
     @BeforeEach
     fun setUp() {
         every { favoriteDao.observeAll() } returns MutableStateFlow(emptyList())
-        every { recentDao.observeAll() } returns MutableStateFlow(emptyList())
+        every { recentDao.observeRecent(any()) } returns MutableStateFlow(emptyList())
         repository = StationRepository(api, favoriteDao, recentDao)
     }
 
@@ -73,18 +73,18 @@ class StationRepositoryTest {
     fun `toggleFavorite removes existing favorite`() = runTest {
         coEvery { favoriteDao.isFavorite("uuid-1") } returns true
 
-        val station = Station(stationUuid = "uuid-1", name = "Test")
+        val station = createStation("uuid-1", "Test")
         val result = repository.toggleFavorite(station)
 
         assertFalse(result)
-        coVerify { favoriteDao.delete("uuid-1") }
+        coVerify { favoriteDao.deleteByUuid("uuid-1") }
     }
 
     @Test
     fun `toggleFavorite adds new favorite`() = runTest {
         coEvery { favoriteDao.isFavorite("uuid-1") } returns false
 
-        val station = Station(stationUuid = "uuid-1", name = "Test")
+        val station = createStation("uuid-1", "Test")
         val result = repository.toggleFavorite(station)
 
         assertTrue(result)
@@ -110,4 +110,16 @@ class StationRepositoryTest {
         coEvery { api.clickStation(any()) } throws RuntimeException("Network error")
         repository.reportClick("uuid-1")
     }
+
+    private fun createStation(uuid: String, name: String) = Station(
+        stationUuid = uuid,
+        name = name,
+        url = "https://stream.test/$uuid",
+        urlResolved = "https://stream.test/$uuid",
+        codec = "FLAC",
+        bitrate = 320,
+        country = "US",
+        language = "English",
+        tags = listOf("test"),
+    )
 }

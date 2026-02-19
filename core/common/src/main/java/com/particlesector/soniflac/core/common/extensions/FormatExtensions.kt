@@ -13,7 +13,7 @@ fun Long.formatBytes(): String {
 }
 
 fun Int.formatSampleRate(): String = when {
-    this >= 1000 -> String.format(Locale.US, "%,d Hz", this)
+    this >= 1000 -> String.format(Locale.US, "%.1f kHz", this / 1000.0)
     else -> "$this Hz"
 }
 

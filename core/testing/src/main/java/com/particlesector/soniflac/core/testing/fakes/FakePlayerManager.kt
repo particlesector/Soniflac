@@ -13,14 +13,20 @@ class FakePlayerManager : PlayerManager {
     private val _playbackState = MutableStateFlow(PlaybackState())
     override val playbackState: StateFlow<PlaybackState> = _playbackState.asStateFlow()
 
-    var playCallCount = 0; private set
-    var pauseCallCount = 0; private set
-    var resumeCallCount = 0; private set
-    var stopCallCount = 0; private set
+    var playCount = 0; private set
+    var pauseCount = 0; private set
+    var resumeCount = 0; private set
+    var stopCount = 0; private set
+    var seekCount = 0; private set
+    var skipNextCount = 0; private set
+    var skipPreviousCount = 0; private set
+    var setShuffleCount = 0; private set
+    var setRepeatModeCount = 0; private set
+    var setQueueCount = 0; private set
     var lastSeekPosition: Long? = null; private set
 
     override fun play(item: PlaybackItem) {
-        playCallCount++
+        playCount++
         _playbackState.value = _playbackState.value.copy(
             isPlaying = true,
             currentItem = item,
@@ -28,43 +34,46 @@ class FakePlayerManager : PlayerManager {
     }
 
     override fun pause() {
-        pauseCallCount++
+        pauseCount++
         _playbackState.value = _playbackState.value.copy(isPlaying = false)
     }
 
     override fun resume() {
-        resumeCallCount++
+        resumeCount++
         _playbackState.value = _playbackState.value.copy(isPlaying = true)
     }
 
     override fun stop() {
-        stopCallCount++
+        stopCount++
         _playbackState.value = PlaybackState()
     }
 
     override fun seekTo(positionMs: Long) {
+        seekCount++
         lastSeekPosition = positionMs
         _playbackState.value = _playbackState.value.copy(position = positionMs)
     }
 
     override fun skipNext() {
-        // No-op in fake
+        skipNextCount++
     }
 
     override fun skipPrevious() {
-        // No-op in fake
+        skipPreviousCount++
     }
 
     override fun setShuffleEnabled(enabled: Boolean) {
+        setShuffleCount++
         _playbackState.value = _playbackState.value.copy(shuffleEnabled = enabled)
     }
 
     override fun setRepeatMode(mode: RepeatMode) {
+        setRepeatModeCount++
         _playbackState.value = _playbackState.value.copy(repeatMode = mode)
     }
 
     override fun setQueue(items: List<PlaybackItem>, startIndex: Int) {
-        // No-op in fake
+        setQueueCount++
     }
 
     override fun release() {

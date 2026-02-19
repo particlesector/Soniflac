@@ -31,10 +31,10 @@ class FormatExtensionsTest {
     }
 
     @Test
-    fun `formatSampleRate formats with commas`() {
-        assertEquals("44,100 Hz", 44100.formatSampleRate())
-        assertEquals("96,000 Hz", 96000.formatSampleRate())
-        assertEquals("192,000 Hz", 192000.formatSampleRate())
+    fun `formatSampleRate formats in kHz`() {
+        assertEquals("44.1 kHz", 44100.formatSampleRate())
+        assertEquals("96.0 kHz", 96000.formatSampleRate())
+        assertEquals("192.0 kHz", 192000.formatSampleRate())
     }
 
     @Test

@@ -42,7 +42,7 @@ class NowPlayingViewModelTest {
             PlaybackState(
                 currentItem = PlaybackItem.TrackItem(track),
                 isPlaying = true,
-                durationMs = track.durationMs,
+                duration = track.duration,
             )
         )
 
@@ -114,7 +114,7 @@ class NowPlayingViewModelTest {
 
     @Test
     fun `toggleShuffle toggles shuffle state`() = runTest {
-        playerManager.emitState(PlaybackState(isShuffleEnabled = false))
+        playerManager.emitState(PlaybackState(shuffleEnabled = false))
 
         viewModel.toggleShuffle()
 
@@ -141,8 +141,8 @@ class NowPlayingViewModelTest {
         playerManager.emitState(
             PlaybackState(
                 currentItem = PlaybackItem.TrackItem(TrackFixtures.autumnLeaves),
-                positionMs = 45_000L,
-                durationMs = 180_000L,
+                position = 45_000L,
+                duration = 180_000L,
             )
         )
 

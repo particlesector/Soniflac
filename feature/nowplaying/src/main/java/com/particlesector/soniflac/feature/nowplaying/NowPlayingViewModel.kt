@@ -36,7 +36,7 @@ class NowPlayingViewModel @Inject constructor(
     fun skipPrevious() = playerManager.skipPrevious()
 
     fun toggleShuffle() {
-        val current = playerManager.playbackState.value.isShuffleEnabled
+        val current = playerManager.playbackState.value.shuffleEnabled
         playerManager.setShuffleEnabled(!current)
     }
 
@@ -65,9 +65,9 @@ class NowPlayingViewModel @Inject constructor(
             album = album ?: "",
             artworkUri = artworkUri,
             isPlaying = isPlaying,
-            positionMs = positionMs,
-            durationMs = durationMs,
-            isShuffleEnabled = isShuffleEnabled,
+            positionMs = position,
+            durationMs = duration,
+            isShuffleEnabled = shuffleEnabled,
             repeatMode = repeatMode,
             hasItem = currentItem != null,
         )

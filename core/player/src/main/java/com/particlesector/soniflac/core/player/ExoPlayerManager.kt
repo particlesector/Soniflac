@@ -11,6 +11,8 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -30,6 +32,7 @@ class ExoPlayerManager @Inject constructor(
     private val _playbackState = MutableStateFlow(PlaybackState())
     override val playbackState: StateFlow<PlaybackState> = _playbackState
 
+    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var exoPlayer: ExoPlayer? = null
     private var positionUpdateJob: Job? = null
 
@@ -70,7 +73,7 @@ class ExoPlayerManager @Inject constructor(
 
         val player = getOrCreatePlayer()
         val uri = when (item) {
-            is PlaybackItem.TrackItem -> item.track.filePath
+            is PlaybackItem.TrackItem -> item.track.path
             is PlaybackItem.StationItem -> item.station.urlResolved.ifEmpty { item.station.url }
         }
         player.setMediaItem(MediaItem.fromUri(uri))
@@ -98,7 +101,7 @@ class ExoPlayerManager @Inject constructor(
 
     override fun seekTo(positionMs: Long) {
         exoPlayer?.seekTo(positionMs)
-        _playbackState.value = _playbackState.value.copy(positionMs = positionMs)
+        _playbackState.value = _playbackState.value.copy(position = positionMs)
     }
 
     override fun skipNext() {
@@ -110,7 +113,7 @@ class ExoPlayerManager @Inject constructor(
     }
 
     override fun setShuffleEnabled(enabled: Boolean) {
-        _playbackState.value = _playbackState.value.copy(isShuffleEnabled = enabled)
+        _playbackState.value = _playbackState.value.copy(shuffleEnabled = enabled)
     }
 
     override fun setRepeatMode(mode: RepeatMode) {
@@ -134,20 +137,21 @@ class ExoPlayerManager @Inject constructor(
         exoPlayer?.release()
         exoPlayer = null
         _playbackState.value = PlaybackState()
+        scope.cancel()
     }
 
     private fun updateState() {
         val player = exoPlayer ?: return
         _playbackState.value = _playbackState.value.copy(
             isPlaying = player.isPlaying,
-            positionMs = player.currentPosition,
-            durationMs = player.duration.coerceAtLeast(0),
+            position = player.currentPosition,
+            duration = player.duration.coerceAtLeast(0),
         )
     }
 
     private fun startPositionUpdates() {
         positionUpdateJob?.cancel()
-        positionUpdateJob = CoroutineScope(Dispatchers.Main).launch {
+        positionUpdateJob = scope.launch {
             while (isActive) {
                 updateState()
                 delay(250)

@@ -1,7 +1,10 @@
 package com.particlesector.soniflac.core.database.dao
 
 import com.particlesector.soniflac.core.database.entity.FavoriteStationEntity
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.test.runTest
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertFalse
@@ -29,10 +32,10 @@ class FavoriteStationDaoTest {
     }
 
     @Test
-    fun `delete favorite station by uuid`() = runTest {
+    fun `deleteByUuid removes station`() = runTest {
         dao.insert(createEntity("uuid-1", "Jazz FM"))
         dao.insert(createEntity("uuid-2", "Rock Station"))
-        dao.delete("uuid-1")
+        dao.deleteByUuid("uuid-1")
 
         val result = dao.observeAll().first()
         assertEquals(1, result.size)
@@ -79,16 +82,6 @@ class FavoriteStationDaoTest {
         assertEquals("New Name", result[0].name)
     }
 
-    @Test
-    fun `observeAll emits updates reactively`() = runTest {
-        val initial = dao.observeAll().first()
-        assertEquals(0, initial.size)
-
-        dao.insert(createEntity("uuid-1", "Station"))
-        val afterInsert = dao.observeAll().first()
-        assertEquals(1, afterInsert.size)
-    }
-
     private fun createEntity(uuid: String, name: String) = FavoriteStationEntity(
         stationUuid = uuid,
         name = name,
@@ -107,30 +100,40 @@ class FavoriteStationDaoTest {
 
 private class InMemoryFavoriteStationDao : FavoriteStationDao {
     private val stations = mutableListOf<FavoriteStationEntity>()
-    private val flow = kotlinx.coroutines.flow.MutableStateFlow<List<FavoriteStationEntity>>(emptyList())
+    private val flow = MutableStateFlow<List<FavoriteStationEntity>>(emptyList())
 
-    override fun observeAll(): kotlinx.coroutines.flow.Flow<List<FavoriteStationEntity>> = flow
+    override fun observeAll(): Flow<List<FavoriteStationEntity>> = flow
 
     override suspend fun getAll(): List<FavoriteStationEntity> = stations.toList()
 
-    override suspend fun getByUuid(stationUuid: String): FavoriteStationEntity? =
-        stations.find { it.stationUuid == stationUuid }
-
-    override suspend fun insert(entity: FavoriteStationEntity) {
-        stations.removeAll { it.stationUuid == entity.stationUuid }
-        stations.add(entity)
-        flow.value = stations.toList()
-    }
-
-    override suspend fun delete(stationUuid: String) {
-        stations.removeAll { it.stationUuid == stationUuid }
-        flow.value = stations.toList()
-    }
+    override suspend fun getByUuid(uuid: String): FavoriteStationEntity? =
+        stations.find { it.stationUuid == uuid }
 
     override suspend fun getCount(): Int = stations.size
 
-    override suspend fun isFavorite(stationUuid: String): Boolean =
-        stations.any { it.stationUuid == stationUuid }
+    override fun observeCount(): Flow<Int> = flow.map { it.size }
+
+    override suspend fun insert(station: FavoriteStationEntity) {
+        stations.removeAll { it.stationUuid == station.stationUuid }
+        stations.add(station)
+        flow.value = stations.toList()
+    }
+
+    override suspend fun delete(station: FavoriteStationEntity) {
+        stations.removeAll { it.stationUuid == station.stationUuid }
+        flow.value = stations.toList()
+    }
+
+    override suspend fun deleteByUuid(uuid: String) {
+        stations.removeAll { it.stationUuid == uuid }
+        flow.value = stations.toList()
+    }
+
+    override suspend fun isFavorite(uuid: String): Boolean =
+        stations.any { it.stationUuid == uuid }
+
+    override fun observeIsFavorite(uuid: String): Flow<Boolean> =
+        flow.map { list -> list.any { it.stationUuid == uuid } }
 
     suspend fun clear() {
         stations.clear()

@@ -44,7 +44,7 @@ class StreamStatsViewModelTest {
 
     @Test
     fun `codec info updates from stream metrics`() = runTest {
-        streamMetrics.emitStats(StreamStats(codec = "FLAC", sampleRate = 44100, bitDepth = 16, channels = 2, bitrateKbps = 1411))
+        streamMetrics.emitStats(StreamStats(codec = "FLAC", sampleRate = 44100, bitDepth = 16, channels = 2, bitrate = 1411))
 
         viewModel.uiState.test {
             val state = awaitItem()
@@ -103,7 +103,7 @@ class StreamStatsViewModelTest {
 
     @Test
     fun `session bytes display from stream stats`() = runTest {
-        streamMetrics.emitStats(StreamStats(codec = "MP3", bytesTransferred = 5_242_880L))
+        streamMetrics.emitStats(StreamStats(codec = "MP3", sessionBytesUsed = 5_242_880L))
 
         viewModel.uiState.test {
             val state = awaitItem()

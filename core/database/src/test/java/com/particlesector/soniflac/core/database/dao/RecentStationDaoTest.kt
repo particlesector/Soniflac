@@ -16,34 +16,34 @@ class RecentStationDaoTest {
 
     @BeforeEach
     fun setUp() = runTest {
-        dao.clear()
+        dao.deleteAll()
     }
 
     @Test
-    fun `insert and observe recent station`() = runTest {
-        dao.insert(createEntity("uuid-1", "Jazz FM", 1000L))
+    fun `upsert and observe recent station`() = runTest {
+        dao.upsert(createEntity("uuid-1", "Jazz FM", 1000L))
 
-        val result = dao.observeAll().first()
+        val result = dao.observeRecent(50).first()
         assertEquals(1, result.size)
         assertEquals("Jazz FM", result[0].name)
     }
 
     @Test
     fun `recents ordered by lastPlayedAt descending`() = runTest {
-        dao.insert(createEntity("uuid-1", "Old", 1000L))
-        dao.insert(createEntity("uuid-2", "New", 2000L))
+        dao.upsert(createEntity("uuid-1", "Old", 1000L))
+        dao.upsert(createEntity("uuid-2", "New", 2000L))
 
-        val result = dao.observeAll().first()
+        val result = dao.observeRecent(50).first()
         assertEquals("New", result[0].name)
         assertEquals("Old", result[1].name)
     }
 
     @Test
-    fun `insert replaces on conflict and updates timestamp`() = runTest {
-        dao.insert(createEntity("uuid-1", "Station", 1000L))
-        dao.insert(createEntity("uuid-1", "Station", 2000L))
+    fun `upsert replaces on conflict and updates timestamp`() = runTest {
+        dao.upsert(createEntity("uuid-1", "Station", 1000L))
+        dao.upsert(createEntity("uuid-1", "Station", 2000L))
 
-        val result = dao.observeAll().first()
+        val result = dao.observeRecent(50).first()
         assertEquals(1, result.size)
         assertEquals(2000L, result[0].lastPlayedAt)
     }
@@ -51,7 +51,7 @@ class RecentStationDaoTest {
     @Test
     fun `getRecent respects limit`() = runTest {
         repeat(10) { i ->
-            dao.insert(createEntity("uuid-$i", "Station $i", i.toLong()))
+            dao.upsert(createEntity("uuid-$i", "Station $i", i.toLong()))
         }
 
         val result = dao.getRecent(5)
@@ -59,13 +59,14 @@ class RecentStationDaoTest {
     }
 
     @Test
-    fun `observeAll emits reactively`() = runTest {
-        val initial = dao.observeAll().first()
-        assertEquals(0, initial.size)
+    fun `deleteByUuid removes station`() = runTest {
+        dao.upsert(createEntity("uuid-1", "Station 1"))
+        dao.upsert(createEntity("uuid-2", "Station 2"))
+        dao.deleteByUuid("uuid-1")
 
-        dao.insert(createEntity("uuid-1", "Station"))
-        val afterInsert = dao.observeAll().first()
-        assertEquals(1, afterInsert.size)
+        val result = dao.observeRecent(50).first()
+        assertEquals(1, result.size)
+        assertEquals("Station 2", result[0].name)
     }
 
     private fun createEntity(
@@ -91,24 +92,24 @@ private class InMemoryRecentStationDao : RecentStationDao {
     private val stations = mutableListOf<RecentStationEntity>()
     private val flow = MutableStateFlow<List<RecentStationEntity>>(emptyList())
 
-    override fun observeAll(): Flow<List<RecentStationEntity>> =
-        flow.map { it.sortedByDescending { s -> s.lastPlayedAt } }
+    override fun observeRecent(limit: Int): Flow<List<RecentStationEntity>> =
+        flow.map { it.sortedByDescending { s -> s.lastPlayedAt }.take(limit) }
 
     override suspend fun getRecent(limit: Int): List<RecentStationEntity> =
         stations.sortedByDescending { it.lastPlayedAt }.take(limit)
 
-    override suspend fun insert(entity: RecentStationEntity) {
-        stations.removeAll { it.stationUuid == entity.stationUuid }
-        stations.add(entity)
+    override suspend fun upsert(station: RecentStationEntity) {
+        stations.removeAll { it.stationUuid == station.stationUuid }
+        stations.add(station)
         flow.value = stations.toList()
     }
 
-    override suspend fun delete(stationUuid: String) {
-        stations.removeAll { it.stationUuid == stationUuid }
+    override suspend fun deleteByUuid(uuid: String) {
+        stations.removeAll { it.stationUuid == uuid }
         flow.value = stations.toList()
     }
 
-    suspend fun clear() {
+    override suspend fun deleteAll() {
         stations.clear()
         flow.value = emptyList()
     }

@@ -35,10 +35,10 @@ class StreamStatsViewModel @Inject constructor(
                 2 -> "Stereo"
                 else -> "${stats.channels}ch"
             },
-            bitrate = stats.bitrateKbps.formatBitrate(),
-            networkThroughput = stats.throughputBytesPerSec.formatBytes() + "/s",
-            bufferHealth = "%.0f%%".format(stats.bufferHealthPercent),
-            sessionDataUsed = stats.bytesTransferred.formatBytes(),
+            bitrate = stats.bitrate.formatBitrate(),
+            networkThroughput = stats.networkThroughputKbps.formatBitrate(),
+            bufferHealth = "%.1fs".format(stats.bufferHealthSeconds),
+            sessionDataUsed = stats.sessionBytesUsed.formatBytes(),
             dailyDataUsed = (todayUsage?.bytesStreamed ?: 0L).formatBytes(),
             monthlyDataUsed = monthlyBytes.formatBytes(),
             isCollecting = stats.codec.isNotEmpty(),
