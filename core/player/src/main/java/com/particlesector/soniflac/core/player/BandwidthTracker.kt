@@ -9,6 +9,7 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicLong
@@ -48,8 +49,8 @@ class BandwidthTracker @Inject constructor() {
     }
 
     fun recordBytes(bytes: Long) {
-        _totalBytes.value = _totalBytes.value + bytes
-        _sessionBytes.value = _sessionBytes.value + bytes
+        _totalBytes.update { it + bytes }
+        _sessionBytes.update { it + bytes }
         pendingBytes.addAndGet(bytes)
     }
 

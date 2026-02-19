@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.particlesector.soniflac.core.common.extensions.formatBitrate
 import com.particlesector.soniflac.core.common.extensions.formatBytes
+import com.particlesector.soniflac.core.common.extensions.formatChannels
 import com.particlesector.soniflac.core.common.extensions.formatSampleRate
 import com.particlesector.soniflac.core.database.repository.DataUsageRepository
 import com.particlesector.soniflac.core.model.StreamStats
@@ -30,11 +31,7 @@ class StreamStatsViewModel @Inject constructor(
             codec = stats.codec,
             sampleRate = stats.sampleRate.formatSampleRate(),
             bitDepth = "${stats.bitDepth}-bit",
-            channels = when (stats.channels) {
-                1 -> "Mono"
-                2 -> "Stereo"
-                else -> "${stats.channels}ch"
-            },
+            channels = stats.channels.formatChannels(),
             bitrate = stats.bitrate.formatBitrate(),
             networkThroughput = stats.networkThroughputKbps.formatBitrate(),
             bufferHealth = "%.1fs".format(stats.bufferHealthSeconds),

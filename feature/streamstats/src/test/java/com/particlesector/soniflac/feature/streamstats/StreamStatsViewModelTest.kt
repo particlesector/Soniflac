@@ -74,7 +74,7 @@ class StreamStatsViewModelTest {
 
         viewModel.uiState.test {
             val state = awaitItem()
-            assertEquals("6ch", state.channels)
+            assertEquals("6 ch", state.channels)
             cancelAndIgnoreRemainingEvents()
         }
     }
