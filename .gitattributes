@@ -1,0 +1,34 @@
+# Enforce LF line endings for all text files on checkout.
+# This prevents Windows contributors from accidentally committing CRLF scripts.
+* text=auto eol=lf
+
+# Shell scripts must always be LF
+*.sh text eol=lf
+
+# Gradle wrapper scripts
+gradlew text eol=lf
+gradlew.bat text eol=crlf
+
+# Windows batch files use CRLF
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Kotlin/XML/TOML source files
+*.kt text eol=lf
+*.kts text eol=lf
+*.xml text eol=lf
+*.toml text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf
+*.json text eol=lf
+
+# Binary files — never touch line endings
+*.jar binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.apk binary
+*.aab binary
+*.keystore binary
