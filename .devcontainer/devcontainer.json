@@ -1,0 +1,46 @@
+{
+    "name": "SoniFlac Android Dev",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    "features": {
+        "ghcr.io/devcontainers/features/github-cli:1": {}
+    },
+
+    // Persist Gradle caches across container rebuilds
+    "mounts": [
+        "source=soniflac-gradle-cache,target=/home/vscode/.gradle,type=volume"
+    ],
+
+    "containerEnv": {
+        "ANDROID_HOME": "/opt/android-sdk",
+        "ANDROID_SDK_ROOT": "/opt/android-sdk",
+        "JAVA_HOME": "/usr/lib/jvm/temurin-17-jdk-amd64"
+    },
+
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "fwcd.kotlin",
+                "mathiasfrohlich.Kotlin",
+                "vscjava.vscode-gradle",
+                "naco-siren.gradle-language",
+                "editorconfig.editorconfig",
+                "eamodio.gitlens"
+            ],
+            "settings": {
+                "kotlin.java.home": "/usr/lib/jvm/temurin-17-jdk-amd64",
+                "java.jdt.ls.java.home": "/usr/lib/jvm/temurin-17-jdk-amd64",
+                "editor.formatOnSave": true,
+                "files.trimTrailingWhitespace": true,
+                "files.insertFinalNewline": true
+            }
+        }
+    },
+
+    // Make scripts executable and verify the environment
+    "postCreateCommand": "chmod +x scripts/*.sh && java --version && sdkmanager --version && adb start-server && echo 'SoniFlac devcontainer ready!'",
+
+    "remoteUser": "vscode"
+}

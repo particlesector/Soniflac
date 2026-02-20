@@ -1,0 +1,75 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Build (fossDebug)",
+            "type": "shell",
+            "command": "./gradlew assembleFossDebug",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build (gplayDebug)",
+            "type": "shell",
+            "command": "./gradlew assembleGplayDebug",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Deploy to Phone (foss)",
+            "type": "shell",
+            "command": "./scripts/deploy.sh foss",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Deploy to Phone (gplay)",
+            "type": "shell",
+            "command": "./scripts/deploy.sh gplay",
+            "group": "build",
+            "problemMatcher": []
+        },
+        {
+            "label": "Pair Phone (Wireless ADB)",
+            "type": "shell",
+            "command": "./scripts/adb-pair.sh",
+            "problemMatcher": [],
+            "presentation": {
+                "reveal": "always",
+                "focus": true
+            }
+        },
+        {
+            "label": "Run Tests (foss)",
+            "type": "shell",
+            "command": "./gradlew testFossDebugUnitTest",
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Run Tests (gplay)",
+            "type": "shell",
+            "command": "./gradlew testGplayDebugUnitTest",
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "Lint + Detekt",
+            "type": "shell",
+            "command": "./gradlew ktlintCheck detekt",
+            "problemMatcher": []
+        },
+        {
+            "label": "Full CI Check",
+            "type": "shell",
+            "command": "./gradlew ktlintCheck detekt testFossDebugUnitTest testGplayDebugUnitTest assembleFossDebug assembleGplayDebug",
+            "problemMatcher": []
+        }
+    ]
+}
